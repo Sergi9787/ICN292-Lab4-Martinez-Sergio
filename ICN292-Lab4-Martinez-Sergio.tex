@@ -1,0 +1,251 @@
+\documentclass[11pt,letterpaper]{article}
+\usepackage[spanish,es-nodecimaldot]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype}
+\usepackage[margin=25mm,inner=30mm,top=30mm]{geometry}
+\usepackage{setspace}
+\setstretch{1.3}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt}
+\usepackage{xcolor,graphicx,float,booktabs,caption}
+\usepackage{fancyhdr}
+\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+\usepackage{xurl}
+\usepackage{listings}
+\lstdefinelanguage{MySQLLab}{
+  language=SQL,
+  morekeywords={AUTO_INCREMENT,DECIMAL,ENUM,SHOW,SET,SQL_SAFE_UPDATES},
+  sensitive=false
+}
+\lstdefinestyle{sqlusm}{
+ language=MySQLLab,basicstyle=\ttfamily\footnotesize,
+ keywordstyle=\color{azulusm}\bfseries,
+ commentstyle=\color{gray},stringstyle=\color{teal!65!black},
+ breaklines=true,breakatwhitespace=false,
+ backgroundcolor=\color{sqlbg},frame=single,rulecolor=\color{black!25},
+ columns=fullflexible,keepspaces=true,showstringspaces=false,
+ xleftmargin=3pt,xrightmargin=3pt,
+ literate={á}{{\'a}}1 {é}{{\'e}}1 {í}{{\'i}}1 {ó}{{\'o}}1 {ú}{{\'u}}1
+ {Á}{{\'A}}1 {É}{{\'E}}1 {Í}{{\'I}}1 {Ó}{{\'O}}1 {Ú}{{\'U}}1
+ {ñ}{{\~n}}1 {Ñ}{{\~N}}1 {ü}{{\"u}}1
+}
+
+\usepackage{ifthen}
+\usepackage{needspace}
+\usepackage{enumitem}
+\usepackage[section]{placeins}
+\definecolor{azulusm}{HTML}{174B79}
+\definecolor{sqlbg}{HTML}{F4F6F9}
+\lstset{style=sqlusm}
+\newcommand{\theCampus}{Campus Vitacura}
+\newcommand{\theAssignment}{Laboratorio N.º 4 — Bases de Datos y SQL}
+\newcommand{\therevision}{ICN292 -- USM}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\IfFileExists{Logo_UTFSM.png}{\includegraphics[height=0.9cm]{Logo_UTFSM.png}}{\small\bfseries Universidad Técnica Federico Santa María}}
+\fancyfoot[L]{\scriptsize Laboratorio N.º 4}
+\fancyfoot[C]{\thepage}
+\fancyfoot[R]{\scriptsize ICN292 -- USM}
+\setlength{\headheight}{36pt}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+\captionsetup{font=small,labelfont=bf}
+\newcommand{\evidencia}[3][0.95]{
+  \begin{figure}[H]\centering
+  \includegraphics[width=#1\linewidth,height=0.27\textheight,keepaspectratio]{capturas/#2.png}
+  \caption{#3}\end{figure}
+}
+\newcommand{\capturapendiente}{
+\begin{center}\fcolorbox{black!40}{sqlbg}{\parbox{.85\linewidth}{\centering\textbf{Captura pendiente:} adjuntar la evidencia del \texttt{UPDATE} ejecutado correctamente y el mensaje de filas afectadas de MySQL Workbench.}}\end{center}}
+\begin{document}
+\begin{titlepage}
+\thispagestyle{empty}
+\begin{center}
+\vspace*{1cm}
+\IfFileExists{header utfsm.png}{\includegraphics[width=0.60\textwidth]{header utfsm.png}}{
+{\Large\bfseries UNIVERSIDAD TÉCNICA FEDERICO SANTA MARÍA}\\[0.25cm]
+{\large Departamento de Industrias — Campus Vitacura}}
+\vspace{1.6cm}
+\par\noindent\rule{\linewidth}{0.8pt}\par\vspace{0.2cm}
+{\LARGE\bfseries Informe de Laboratorio N.º 4}\\[0.35cm]
+{\Large Bases de Datos y SQL — Austral Editores}\\[0.35cm]
+{\large Sistemas de Información para la Gestión (ICN292)}
+\vspace{0.2cm}\par\noindent\rule{\linewidth}{0.8pt}\par
+\vspace{1.5cm}
+{\Large\bfseries Sergio Martínez}\\[0.5cm]
+{\large Semestre 2026/02}\\[0.35cm]
+{\large Departamento de Industrias}\\[0.5cm]
+\vspace{0.7cm}
+\textbf{Repositorio público GitHub:}\\[0.2cm]
+\href{https://github.com/Sergi9787/ICN292-Lab4-Martinez-Sergio}{\texttt{https://github.com/Sergi9787/ICN292-Lab4-Martinez-Sergio}}\\
+\vfill
+{\large Noviembre 2026}\\[0.35cm]
+{\large\theCampus}
+\end{center}
+\end{titlepage}
+\section*{Entregable 2: Consultas SQL}
+\addcontentsline{toc}{section}{Entregable 2: Consultas SQL}
+\subsection*{Consulta 1. Autores cuyo país no es Chile}
+\begin{lstlisting}
+SELECT nombre, genero
+FROM autores
+WHERE pais <> 'Chile' OR pais IS NULL
+ORDER BY nombre ASC;
+\end{lstlisting}
+\textbf{Explicación solicitada:} \texttt{pais <> 'Chile'} devuelve los países conocidos distintos de Chile; el valor \texttt{NULL} no satisface esa comparación porque produce un valor lógico desconocido, por lo que se agrega \texttt{OR pais IS NULL}.
+\evidencia[0.7]{c01}{Consulta 1: autores seleccionados, incluyendo el país desconocido.}
+\FloatBarrier
+
+\subsection*{Consulta 2. Libros de 190 a 220 páginas}
+\begin{lstlisting}
+SELECT titulo, paginas
+FROM libros
+WHERE paginas BETWEEN 190 AND 220
+ORDER BY paginas ASC, titulo ASC;
+\end{lstlisting}
+\evidencia[0.77]{c02}{Consulta 2: siete libros dentro del intervalo de páginas.}
+\FloatBarrier
+
+\subsection*{Consulta 3. Indicadores del catálogo original}
+\begin{lstlisting}
+SELECT COUNT(*) AS total_libros,
+       SUM(ejemplares_vendidos) AS total_ejemplares,
+       AVG(paginas) AS promedio_paginas,
+       MIN(anio) AS anio_mas_antiguo,
+       MAX(ejemplares_vendidos) AS mayor_venta_libro
+FROM libros;
+\end{lstlisting}
+\evidencia[1.0]{c03}{Consulta 3: indicadores consolidados de la carga oficial.}
+\FloatBarrier
+
+\subsection*{Consulta 4. Géneros distintos}
+\begin{lstlisting}
+SELECT DISTINCT CAST(genero AS CHAR) AS genero
+FROM autores
+ORDER BY genero ASC;
+\end{lstlisting}
+\evidencia[0.53]{c04}{Consulta 4: géneros sin duplicados, en orden alfabético.}
+\FloatBarrier
+
+\subsection*{Consulta 5. Autores con más de un libro en 2024}
+\begin{lstlisting}
+SELECT a.nombre, COUNT(*) AS libros_2024
+FROM autores AS a
+JOIN libros AS l ON l.id_autor = a.id_autor
+WHERE l.anio = 2024
+GROUP BY a.id_autor, a.nombre
+HAVING COUNT(*) > 1
+ORDER BY a.nombre ASC;
+\end{lstlisting}
+\evidencia[0.65]{c05}{Consulta 5: autores con más de una publicación durante 2024.}
+\FloatBarrier
+
+\subsection*{Consulta 6. Tres libros más vendidos de 2024}
+\begin{lstlisting}
+SELECT titulo, ejemplares_vendidos
+FROM libros
+WHERE anio = 2024
+  AND ejemplares_vendidos > 2000
+ORDER BY ejemplares_vendidos DESC, titulo ASC
+LIMIT 3;
+\end{lstlisting}
+\evidencia[0.72]{c06}{Consulta 6: tres libros de 2024 con más de 2.000 ejemplares.}
+\FloatBarrier
+
+\subsection*{Consulta 7. Inserción y eliminación de Papel Mojado}
+\begin{lstlisting}
+INSERT INTO libros (id_autor, titulo, paginas,
+                   ejemplares_vendidos, anio)
+VALUES (3, 'Papel Mojado', 260, 50, 2024);
+
+SELECT * FROM libros
+WHERE titulo = 'Papel Mojado';
+\end{lstlisting}
+\begin{lstlisting}
+-- Para ejecutar el borrado por titulo en MySQL Workbench,
+-- es necesario que la sesión lo permita (Safe Updates).
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM libros WHERE titulo = 'Papel Mojado';
+SET SQL_SAFE_UPDATES = 1;
+
+SELECT * FROM libros
+WHERE titulo = 'Papel Mojado';
+\end{lstlisting}
+\evidencia[1.0]{c07_antes}{Consulta 7: libro insertado, antes de eliminarlo.}
+\evidencia[1.0]{c07_despues}{Consulta 7: SELECT posterior a la eliminación, sin resultados.}
+\FloatBarrier
+
+\subsection*{Consulta 8. Aumento de 100 ejemplares en Cielo de Enero}
+\begin{lstlisting}
+SELECT titulo, ejemplares_vendidos
+FROM libros
+WHERE titulo = 'Cielo de Enero';
+\end{lstlisting}
+\begin{lstlisting}
+UPDATE libros
+SET ejemplares_vendidos = ejemplares_vendidos + 100
+WHERE id_libro = 1;
+\end{lstlisting}
+\begin{lstlisting}
+SELECT titulo, ejemplares_vendidos
+FROM libros
+WHERE titulo = 'Cielo de Enero';
+\end{lstlisting}
+\textbf{Evidencia adicional requerida por el enunciado:} captura de la ejecución exitosa del \texttt{UPDATE}, todavía no proporcionada.\par\capturapendiente
+\evidencia[0.75]{c08_antes}{Consulta 8: SELECT previo, con 1.500 ejemplares.}
+\evidencia[0.75]{c08_despues}{Consulta 8: SELECT posterior, con 1.600 ejemplares.}
+\FloatBarrier
+
+\subsection*{Consulta 9. Colecciones y sus libros}
+\begin{lstlisting}
+-- Datos de prueba incorporados para la consulta 9.
+INSERT INTO colecciones (titulo, fecha_publicacion) VALUES
+('Colección Austral Contemporánea', '2024-03-14'),
+('Colección Letras y Horizontes', '2023-08-09');
+
+UPDATE libros SET id_coleccion = 1
+WHERE id_libro IN (1, 3, 5, 8, 9, 11);
+UPDATE libros SET id_coleccion = 2
+WHERE id_libro IN (2, 4, 6, 7, 10, 12);
+\end{lstlisting}
+\begin{lstlisting}
+SELECT l.titulo AS libro,
+       c.titulo AS coleccion,
+       c.fecha_publicacion
+FROM libros AS l
+JOIN colecciones AS c
+    ON l.id_coleccion = c.id_coleccion
+ORDER BY l.id_libro;
+\end{lstlisting}
+\evidencia[1.0]{c09}{Consulta 9: doce libros vinculados a sus colecciones.}
+\FloatBarrier
+
+\subsection*{Consulta 10. Pagos a los autores}
+\begin{lstlisting}
+-- Datos de prueba incorporados para la consulta 10.
+INSERT INTO pagos (id_autor, fecha_pago, monto) VALUES
+(1, '2026-10-01', 150000.00),
+(1, '2026-10-15',  95000.50),
+(3, '2026-10-19',  80000.00),
+(4, '2026-10-27', 120000.00);
+\end{lstlisting}
+\begin{lstlisting}
+SELECT a.nombre AS autor, p.fecha_pago, p.monto
+FROM pagos AS p
+JOIN autores AS a ON p.id_autor = a.id_autor
+ORDER BY a.nombre ASC, p.fecha_pago ASC;
+\end{lstlisting}
+\begin{lstlisting}
+SELECT a.nombre AS autor,
+       SUM(p.monto) AS total_pagado
+FROM autores AS a
+JOIN pagos AS p ON a.id_autor = p.id_autor
+GROUP BY a.id_autor, a.nombre
+ORDER BY a.nombre ASC;
+\end{lstlisting}
+\evidencia[0.85]{c10_detalle}{Consulta 10, primera sentencia: detalle de los cuatro pagos.}
+\evidencia[0.8]{c10_total}{Consulta 10, segunda sentencia: suma de pagos por autor.}
+\FloatBarrier
+
+\end{document}
